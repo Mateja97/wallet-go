@@ -13,6 +13,7 @@ type KafkaConsumer struct {
 	Wg       sync.WaitGroup
 }
 
+//Init Kafka cosumer that reads messages on provided kafka topic
 func (kC *KafkaConsumer) Init(kafkaBrokers []string, kafkaTopic string) error {
 	kC.topic = kafkaTopic
 	var err error
@@ -23,6 +24,7 @@ func (kC *KafkaConsumer) Init(kafkaBrokers []string, kafkaTopic string) error {
 	return nil
 }
 
+//ConsumeMessage consumes kafka messages and send them to the provided channel
 func (kC *KafkaConsumer) ConsumeMessage(ch chan *sarama.ConsumerMessage) {
 	partitions, err := kC.consumer.Partitions(kC.topic)
 	if err != nil {
@@ -50,6 +52,7 @@ func (kC *KafkaConsumer) ConsumeMessage(ch chan *sarama.ConsumerMessage) {
 	}
 }
 
+//Gracefully stop consumer
 func (kC *KafkaConsumer) Stop() error {
 	if err := kC.consumer.Close(); err != nil {
 		log.Println("[ERROR] Consumer close failed")

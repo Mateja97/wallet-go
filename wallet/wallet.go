@@ -19,14 +19,15 @@ import (
 )
 
 type Wallet struct {
-	server *http.Server
-	db     *sql.DB
-	sync.Mutex
+	server         *http.Server
+	db             *sql.DB
+	cacheLock      sync.Mutex
 	dbzMess        chan *sarama.ConsumerMessage
 	consumer       kafka.KafkaConsumer
 	userFundsCache map[string]int
 }
 
+//Init wallet service providing necessary parameters for database and kafka consumer
 func (w *Wallet) Init(port, dbUsr, dbPw, dbHost, dbPort, dbName, kafkaTopic string, brokers []string, ch chan *sarama.ConsumerMessage) error {
 	w.dbzMess = ch
 	w.userFundsCache = make(map[string]int)
@@ -53,6 +54,7 @@ func (w *Wallet) Init(port, dbUsr, dbPw, dbHost, dbPort, dbName, kafkaTopic stri
 	return nil
 }
 
+//Run - runs wallet to listen rest api request, consume kafka topics and store data to the userFundsCache
 func (w *Wallet) Run() {
 	go func() {
 		if err := w.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
@@ -88,6 +90,8 @@ func (w *Wallet) Run() {
 	}
 
 }
+
+//Stop gracefully stop http server, kafka consumer and database connection
 func (w *Wallet) Stop() {
 	if err := w.server.Shutdown(context.Background()); err != nil {
 		log.Println("[ERROR] Wallet server shutdown failed")

@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
+//GetFunds return user funds from cache
 func (wl *Wallet) GetFunds() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
@@ -20,6 +21,7 @@ func (wl *Wallet) GetFunds() http.HandlerFunc {
 	}
 }
 
+//AddFunds function that manipulate with funds (adding/removing)
 func (wl *Wallet) AddFunds() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
@@ -32,9 +34,9 @@ func (wl *Wallet) AddFunds() http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		log.Println("[INFO] New funds: ", p.Funds)
-		wl.Lock()
-		defer wl.Unlock()
+		log.Println("[INFO] New arrived funds: ", p.Funds)
+		wl.cacheLock.Lock()
+		defer wl.cacheLock.Unlock()
 		currentFunds := wl.userFundsCache[user]
 		currentFunds += p.Funds
 		if currentFunds < 0 {
@@ -52,6 +54,7 @@ func (wl *Wallet) AddFunds() http.HandlerFunc {
 		if err != nil {
 			log.Println("[ERROR] GetFunds Marshaling failed")
 		}
+		log.Println("[INFO] New current funds: ", currentFunds, " user: ", user)
 
 		w.Write(data)
 	}
