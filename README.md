@@ -4,13 +4,13 @@ Wallet for funds
 # Preperation 
  - docker-compose up -d
  - docker-compose exec walletdb sh -c 'psql -U wallet < /db/script.sql'
- - debezium connector through POST on http://localhost:8083/connectors/ 
+ - debezium connector through POST on http://<host ip>/connectors/ 
 with body: 
 {
     "name": "players-connector",
     "config": {
         "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
-        "database.hostname": "172.17.0.1",
+        "database.hostname":-host ip-,
         "database.port": "5432",
         "database.user": "wallet",
         "database.password": "wallet",
@@ -22,4 +22,4 @@ with body:
 }
 
 # Run 
-go run ./cmd/wallet/ -kafka.topic=wallet.public.wallet -kafka.brokers="172.17.0.1:9092" -db.host=172.17.0.1 -db.port=:5432 -db.usr=wallet -db.pw=wallet -db.name=wallet 
+go run ./cmd/wallet/ -kafka.topic=wallet.public.wallet -kafka.brokers="-host ip-:9092" -db.host=-host ip- -db.port=:5432 -db.usr=wallet -db.pw=wallet -db.name=wallet 
